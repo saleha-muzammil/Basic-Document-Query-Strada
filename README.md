@@ -1,1 +1,1 @@
-Api using firebase 
+Api using firebase admin sdk
