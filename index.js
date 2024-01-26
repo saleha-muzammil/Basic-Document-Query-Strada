@@ -13,7 +13,7 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-
+// getting all data
 app.get('/getData', async (req, res) => {
   try {
     const snapshot = await db.collection('123').get();
@@ -24,16 +24,52 @@ app.get('/getData', async (req, res) => {
   }
 });
 
+
+
 app.post('/addData', async (req, res) => {
   try {
     const { newData } = req.body;
     const addedDoc = await db.collection('123').add(newData);
-    res.status(201).send({ id: addedDoc.id });
+    res.status(201).send({ id: addedDoc.id }); // sending the id back to client if he wants to retrive/ update /delete data later 
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+// to update the data we will have to pass the document id as well 
+app.put('/updateData/:id', async (req, res) => {
+  try {
+    const docRef = db.collection('123').doc(req.params.id);
+    await docRef.update(req.body);
+    res.status(200).send('Updated');
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+// we will habe to pass the id as well
+app.delete('/deleteData/:id', async (req, res) => {
+  try {
+    const docRef = db.collection('123').doc(req.params.id);
+    await docRef.delete();
+    res.status(200).send('Deleted');
   } catch (error) {
     res.status(500).send(error.message);
   }
 });
 
+// getting only a single record by passing id
+app.get('/getData/:id', async (req, res) => {
+  try {
+    const docRef = db.collection('123').doc(req.params.id);
+    const doc = await docRef.get();
+    if (!doc.exists) {
+      res.status(404).send('Not found');
+    } else {
+      res.status(200).send({ id: doc.id, ...doc.data() });
+    }
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
